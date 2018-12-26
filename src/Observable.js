@@ -12,15 +12,13 @@ export type ObservableCompatible<T> = {
 }
 
 export type ObservableLike<T> = {
-  subscribe(
-    onNext: (T) => mixed,
-    onError?: (Error) => mixed,
-    onComplete?: () => mixed,
-  ): SubscriptionLike<T>,
-
-  subscribe(observer: Observer<T>): SubscriptionLike<T>,
-
-  +[typeof $$observable]: () => ObservableLike<T>,
+  +subscribe: ((observer: Observer<T>) => SubscriptionLike<T>) &
+    ((
+      onNext: (T) => mixed,
+      onError?: (T) => mixed,
+      onComplete?: () => mixed,
+    ) => SubscriptionLike<T>),
+  +[SymbolObservable]: () => ObservableLike<T>,
 }
 
 export type Subscriber<T> = (
@@ -34,7 +32,7 @@ const [getSubscriber, setSubscriber] = getSet<
 
 const emptyFn = () => {}
 
-const fromArray = <T>(items: $ReadOnlyArray<T>): Observable<T> =>
+const fromArray = <T>(items: $ReadOnlyArray<T>): ObservableLike<T> =>
   new Observable(observer => {
     try {
       items.forEach(value => observer.next(value))
@@ -47,17 +45,17 @@ const fromArray = <T>(items: $ReadOnlyArray<T>): Observable<T> =>
   })
 
 export class Observable<T> {
-  static of<V>(...items: $ReadOnlyArray<V>): Observable<V> {
+  static of<V>(...items: $ReadOnlyArray<V>): ObservableLike<V> {
     return fromArray(items)
   }
 
-  /* :: static from: <V>(values: ObservableCompatible<V> | Iterable<V>) => Observable<V> */
-
-  static from<V>(values: any): Observable<V> {
+  static from<V>(
+    values: ObservableCompatible<V> | Iterable<V>,
+  ): ObservableLike<V> {
     if (values instanceof Observable) return values
 
-    if (typeof values[$$observable] == 'function') {
-      const result: ObservableLike<V> = values[$$observable]()
+    if (typeof (values: any)[$$observable] == 'function') {
+      const result: ObservableLike<V> = (values: any)[$$observable]()
 
       return result instanceof Observable
         ? result
@@ -66,9 +64,9 @@ export class Observable<T> {
 
     if (Array.isArray(values)) return fromArray(values)
 
-    if (typeof values[Symbol.iterator] == 'function') {
+    if (typeof (values: any)[Symbol.iterator] == 'function') {
       return new Observable(observer => {
-        const iterator: Iterator<V> = values[Symbol.iterator]()
+        const iterator: Iterator<V> = (values: any)[Symbol.iterator]()
 
         let current = iterator.next()
 
@@ -86,8 +84,17 @@ export class Observable<T> {
     throw new TypeError('values must be an Array, Observable or Iterable')
   }
 
-  constructor(subscriber: Subscriber<T>) {
+  /* ::
+  static +from: (<V>(values: ObservableCompatible<V>) => ObservableLike<V>) &
+    (<V>(values: Iterable<V>) => ObservableLike<V>)
+  */
+
+  constructor<V>(subscriber: Subscriber<V>): ObservableLike<V> {
     setSubscriber(this, subscriber)
+    /* ::
+    declare var instance: ObservableLike<V>;
+    return instance
+    */
   }
 
   /* ::

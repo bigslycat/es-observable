@@ -9,6 +9,7 @@
   "files": [
     "README.md",
     "LICENSE.md",
+    "flow-typed",
     "lib",
     "esm",
     "src"
