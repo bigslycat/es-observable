@@ -23,7 +23,6 @@ const [getSubscriptionObserver, setSubscriptionObserver] = getSet<
 // eslint-disable-next-line no-unused-vars
 export interface SubscriptionLike<T> {
   unsubscribe(): void;
-  +closed: boolean;
 }
 
 const emptyFn = () => {}
