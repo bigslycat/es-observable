@@ -54,7 +54,7 @@ import {
 import type { SymbolObservable } from 'symbol-observable'
 
 type ObservableCompatible<T> = {
-  +[SymbolObservable]: () => ObservableLike<T>,
+  '@@observable'(): ObservableLike<T>,
 }
 ```
 
@@ -63,16 +63,14 @@ type ObservableCompatible<T> = {
 ```ts
 import type { SymbolObservable } from 'symbol-observable'
 
-type ObservableLike<T> = {
-  subscribe(
-    onNext: (value: T) => mixed,
-    onError?: (error: Error) => mixed,
-    onComplete?: () => mixed,
-  ): SubscriptionLike<T>,
-
-  subscribe(observer: Observer<T>): SubscriptionLike<T>,
-
-  +[SymbolObservable]: () => ObservableLike<T>,
+export type ObservableLike<T> = {
+  +subscribe: ((observer: Observer<T>) => SubscriptionLike<T>) &
+    ((
+      onNext: (T) => mixed,
+      onError?: (T) => mixed,
+      onComplete?: () => mixed,
+    ) => SubscriptionLike<T>),
+  '@@observable'(): ObservableLike<T>,
 }
 ```
 
