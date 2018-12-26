@@ -1,6 +1,6 @@
 # es-observable
 
-ES Observable proposal implementation
+[ES Observable proposal](https://github.com/tc39/proposal-observable) implementation
 
 [![Build Status][status-img]][status-url]
 [![Coverage Status](https://coveralls.io/repos/github/bigslycat/es-observable/badge.svg?branch=master)](https://coveralls.io/github/bigslycat/es-observable?branch=master)
