@@ -1,5 +1,3 @@
-/* @flow */
-
 // eslint-disable-next-line no-unused-vars
 import regeneratorRuntime from 'regenerator-runtime'
 
@@ -101,15 +99,13 @@ test.cb('Observable.from Iterable', t => {
   const next = sinon.spy()
   const complete = sinon.spy()
 
-  const iterable: any = {
+  Observable.from({
     *[Symbol.iterator]() {
       yield 0
       yield 1
       yield 2
     },
-  }
-
-  Observable.from(iterable).subscribe(next, t.end, complete)
+  }).subscribe(next, t.end, complete)
 
   t.deepEqual(next.args, [[0], [1], [2]])
   t.true(complete.calledOnce)
@@ -123,7 +119,7 @@ test('Observable.from Observable instance', t => {
   t.is(Observable.from(initial), initial)
   t.is(
     Observable.from({
-      [$$observable]: (): any => initial,
+      [$$observable]: () => initial,
     }),
     initial,
   )
