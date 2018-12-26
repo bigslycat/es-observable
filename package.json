@@ -1,6 +1,6 @@
 {
   "name": "es-observable",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "ES Observable proposal implementation",
   "repository": "bigslycat/es-observable",
   "author": "Pavel Tereschenko <me@stupidcat.wtf> (https://github.com/bigslycat)",
