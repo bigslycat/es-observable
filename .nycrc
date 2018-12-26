@@ -1,18 +1,7 @@
 {
-  "require": [
-    "esm",
-    "@babel/register"
-  ],
-  "reporter": [
-    "lcov",
-    "text"
-  ],
-  "exclude": [
-    "**/index.js",
-    "**/*.config.js",
-    "**/*.test.js",
-    "lib"
-  ],
+  "require": ["@babel/register"],
+  "reporter": ["lcov", "text"],
+  "exclude": ["**/index.js", "**/*.config.js", "**/*.test.js", "lib"],
   "sourceMap": false,
   "instrument": false
 }
