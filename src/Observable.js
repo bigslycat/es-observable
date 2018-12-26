@@ -1,15 +1,31 @@
 /* @flow */
 
-import $$observable from 'symbol-observable'
+import $$observable, { type SymbolObservable } from 'symbol-observable'
 
 import type { Observer } from './Observer'
 import { Subscription, type SubscriptionLike } from './Subscription'
 import { SubscriptionObserver } from './SubscriptionObserver'
 import { getSet } from './getSet'
 
+export type ObservableCompatible<T> = {
+  +[SymbolObservable]: () => ObservableLike<T>,
+}
+
+export type ObservableLike<T> = {
+  subscribe(
+    onNext: (T) => mixed,
+    onError?: (Error) => mixed,
+    onComplete?: () => mixed,
+  ): SubscriptionLike<T>,
+
+  subscribe(observer: Observer<T>): SubscriptionLike<T>,
+
+  +[typeof $$observable]: () => ObservableLike<T>,
+}
+
 export type Subscriber<T> = (
   observer: SubscriptionObserver<T>,
-) => SubscriptionLike<T> | (() => void)
+) => SubscriptionLike<any> | (() => void)
 
 const [getSubscriber, setSubscriber] = getSet<
   /* ::Observable<any>, */
@@ -35,13 +51,13 @@ export class Observable<T> {
     return fromArray(items)
   }
 
-  /* :: static from: <V>(values: Observable<V> | Iterable<V>) => Observable<V> */
+  /* :: static from: <V>(values: ObservableCompatible<V> | Iterable<V>) => Observable<V> */
 
   static from<V>(values: any): Observable<V> {
     if (values instanceof Observable) return values
 
     if (typeof values[$$observable] == 'function') {
-      const result = values[$$observable]()
+      const result: ObservableLike<V> = values[$$observable]()
 
       return result instanceof Observable
         ? result
