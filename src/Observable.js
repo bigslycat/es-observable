@@ -1,6 +1,6 @@
 /* @flow */
 
-import $$observable, { type SymbolObservable } from 'symbol-observable'
+import $$observable from 'symbol-observable'
 
 import type { Observer } from './Observer'
 import { Subscription, type SubscriptionLike } from './Subscription'
@@ -8,17 +8,16 @@ import { SubscriptionObserver } from './SubscriptionObserver'
 import { getSet } from './getSet'
 
 export type ObservableCompatible<T> = {
-  +[SymbolObservable]: () => ObservableLike<T>,
+  '@@observable'(): ObservableLike<T>,
 }
 
-export type ObservableLike<T> = {
+export type ObservableLike<T> = ObservableCompatible<T> & {
   +subscribe: ((observer: Observer<T>) => SubscriptionLike<T>) &
     ((
       onNext: (T) => mixed,
       onError?: (T) => mixed,
       onComplete?: () => mixed,
     ) => SubscriptionLike<T>),
-  +[SymbolObservable]: () => ObservableLike<T>,
 }
 
 export type Subscriber<T> = (
@@ -32,7 +31,7 @@ const [getSubscriber, setSubscriber] = getSet<
 
 const emptyFn = () => {}
 
-const fromArray = <T>(items: $ReadOnlyArray<T>): ObservableLike<T> =>
+const fromArray = <T>(items: $ReadOnlyArray<T>): Observable<T> =>
   new Observable(observer => {
     try {
       items.forEach(value => observer.next(value))
@@ -45,13 +44,13 @@ const fromArray = <T>(items: $ReadOnlyArray<T>): ObservableLike<T> =>
   })
 
 export class Observable<T> {
-  static of<V>(...items: $ReadOnlyArray<V>): ObservableLike<V> {
+  static of<V>(...items: $ReadOnlyArray<V>): Observable<V> {
     return fromArray(items)
   }
 
   static from<V>(
-    values: ObservableCompatible<V> | Iterable<V>,
-  ): ObservableLike<V> {
+    values: Observable<V> | ObservableCompatible<V> | Iterable<V>,
+  ): Observable<V> {
     if (values instanceof Observable) return values
 
     if (typeof (values: any)[$$observable] == 'function') {
@@ -85,16 +84,14 @@ export class Observable<T> {
   }
 
   /* ::
-  static +from: (<V>(values: ObservableCompatible<V>) => ObservableLike<V>) &
-    (<V>(values: Iterable<V>) => ObservableLike<V>)
+  static +from:
+    (<V>(values: Observable<V>) => Observable<V>) &
+    (<V>(values: ObservableCompatible<V>) => Observable<V>) &
+    (<V>(values: Iterable<V>) => Observable<V>)
   */
 
-  constructor<V>(subscriber: Subscriber<V>): ObservableLike<V> {
+  constructor(subscriber: Subscriber<T>) {
     setSubscriber(this, subscriber)
-    /* ::
-    declare var instance: ObservableLike<V>;
-    return instance
-    */
   }
 
   /* ::

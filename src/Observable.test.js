@@ -101,13 +101,15 @@ test.cb('Observable.from Iterable', t => {
   const next = sinon.spy()
   const complete = sinon.spy()
 
-  Observable.from({
-    *[Symbol.iterator]() {
-      yield 0
-      yield 1
-      yield 2
-    },
-  }).subscribe(next, t.end, complete)
+  Observable.from(
+    ({
+      *[Symbol.iterator]() {
+        yield 0
+        yield 1
+        yield 2
+      },
+    }: any),
+  ).subscribe(next, t.end, complete)
 
   t.deepEqual(next.args, [[0], [1], [2]])
   t.true(complete.calledOnce)
@@ -121,7 +123,7 @@ test('Observable.from Observable instance', t => {
   t.is(Observable.from(initial), initial)
   t.is(
     Observable.from({
-      [$$observable]: () => initial,
+      [$$observable]: (): any => initial,
     }),
     initial,
   )
@@ -137,6 +139,9 @@ test.cb('Observable.from Observable compatible', t => {
     [$$observable]: () => ({
       subscribe(...args) {
         return initial.subscribe(...args)
+      },
+      [$$observable]() {
+        return this
       },
     }),
   })
