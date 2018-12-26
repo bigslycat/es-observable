@@ -101,15 +101,15 @@ test.cb('Observable.from Iterable', t => {
   const next = sinon.spy()
   const complete = sinon.spy()
 
-  Observable.from(
-    ({
-      *[Symbol.iterator]() {
-        yield 0
-        yield 1
-        yield 2
-      },
-    }: any),
-  ).subscribe(next, t.end, complete)
+  const iterable: any = {
+    *[Symbol.iterator]() {
+      yield 0
+      yield 1
+      yield 2
+    },
+  }
+
+  Observable.from(iterable).subscribe(next, t.end, complete)
 
   t.deepEqual(next.args, [[0], [1], [2]])
   t.true(complete.calledOnce)
