@@ -30,7 +30,7 @@
     }
   },
   "dependencies": {
-    "core-js": "^2.6.1",
+    "core-js": "^3.0.1",
     "symbol-observable": "^1.2.0"
   },
   "devDependencies": {
